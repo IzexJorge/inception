@@ -6,7 +6,7 @@ endif
 include srcs/.env
 
 ifndef LOGIN
-	$(error LOGIN no está definido en srcs/.env)
+	$(error LOGIN is not defined in srcs/.env)
 endif
 DATA_DIR = /home/$(LOGIN)/data
 
