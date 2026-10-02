@@ -1,26 +1,34 @@
 
 ifeq ($(wildcard srcs/.env),)
-	$(error srcs/.env doesn't exist. You can copy and fill srcs/.env.example)
+	$(error srcs/.env doesn't exist. You can copy and rename srcs/.env.example and then fill it out)
 endif
 
 include srcs/.env
 
-ifndef LOGIN
-	$(error LOGIN is not defined in srcs/.env)
-endif
-DATA_DIR = /home/$(LOGIN)/data
+REQUIRED_VARS = LOGIN DOMAIN_NAME MYSQL_DATABASE MYSQL_USER \
+				WP_TITLE WP_ADMIN_USER WP_ADMIN_EMAIL WP_USER WP_USER_EMAIL
 
-COMPOSE = srcs/docker-compose.yml
+$(foreach var,$(REQUIRED_VARS),$(if $($(var)),,$(error $(var) is not defined in srcs/.env)))
+DATA_DIR := /home/$(LOGIN)/data
+
+WP_ADMIN_USER_LOWER := $(shell echo $(WP_ADMIN_USER) | tr '[:upper:]' '[:lower:]')
+
+ifneq ($(findstring admin,$(WP_ADMIN_USER_LOWER)),)
+	$(error WP_ADMIN_USER ("$(WP_ADMIN_USER)") cannot contain "admin" in its name in srcs/.env)
+endif
+
 SECRETS_DIR = secrets
-SECRET_FILES = $(addprefix $(SECRETS_DIR)/, db_password.txt db_root_password.txt \
+SECRET_FILES := $(addprefix $(SECRETS_DIR)/, db_password.txt db_root_password.txt \
 				wp_admin_password.txt wp_user_password.txt)
 SHELL = /bin/bash
+
+COMPOSE = srcs/docker-compose.yml
 
 .DELETE_ON_ERROR:
 
 all: up
 
-up: $(SECRET_FILES) | $(DATA_DIR)
+up: $(SECRET_FILES) | $(DATA_DIR)/wordpress $(DATA_DIR)/mariadb
 	docker compose -f $(COMPOSE) up --detach --build
 
 down:
@@ -52,9 +60,11 @@ re: fclean all
 
 .PHONY: all up down stop start restart ps logs clean fclean re
 
-$(DATA_DIR):
-	mkdir -p $@/wordpress
-	mkdir -p $@/mariadb
+$(DATA_DIR)/wordpress:
+	mkdir -p $@
+
+$(DATA_DIR)/mariadb:
+	mkdir -p $@
 
 $(SECRETS_DIR):
 	mkdir -p $@
