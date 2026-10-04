@@ -1,0 +1,25 @@
+
+FROM debian:bookworm-slim
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        php-fpm php-cli php-mysqli php-gd php-curl php-xml \
+        php-mbstring php-zip php-intl mariadb-client curl && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN curl -o /usr/local/bin/wp -sSL \
+        https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar && \
+    chmod +x /usr/local/bin/wp
+
+RUN mkdir -p /usr/src/wordpress && \
+    wp core download --path=/usr/src/wordpress --allow-root
+
+COPY conf/www.conf /etc/php/8.2/fpm/pool.d/www.conf
+COPY tools/init_wp.sh /usr/local/bin/init_wp.sh
+RUN chmod +x /usr/local/bin/init_wp.sh
+
+WORKDIR /var/www/html
+
+EXPOSE 9000
+
+ENTRYPOINT ["init_wp.sh"]

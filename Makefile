@@ -49,6 +49,10 @@ ps:
 logs:
 	docker compose -f $(COMPOSE) logs --follow
 
+reset-data:
+	docker compose -f $(COMPOSE) down
+	sudo rm -rf $(DATA_DIR)/wordpress $(DATA_DIR)/mariadb
+
 clean:
 	docker compose -f $(COMPOSE) down --rmi all --remove-orphans
 
@@ -58,7 +62,7 @@ fclean:
 
 re: fclean all
 
-.PHONY: all up down stop start restart ps logs clean fclean re
+.PHONY: all up down stop start restart ps logs reset-data clean fclean re
 
 $(DATA_DIR)/wordpress:
 	mkdir -p $@
