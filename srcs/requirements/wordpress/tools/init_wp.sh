@@ -5,6 +5,7 @@ set -e
 DB_PASSWORD=$(cat /run/secrets/db_password)
 WP_ADMIN_PASSWORD=$(cat /run/secrets/wp_admin_password)
 WP_USER_PASSWORD=$(cat /run/secrets/wp_user_password)
+MARKER="/var/www/html/.initialized"
 
 if [[ "${WP_ADMIN_USER,,}" == *admin* ]]; then
 	echo "Error: WP_ADMIN_USER cannot contain 'admin' in its name in srcs/.env" >&2
@@ -12,11 +13,17 @@ if [[ "${WP_ADMIN_USER,,}" == *admin* ]]; then
 fi
 
 echo "Waiting for MariaDB to accept connections..."
+RETRIES=45
 until mysqladmin ping -h"mariadb" -u"${MYSQL_USER}" -p"${DB_PASSWORD}" --silent 2>/dev/null; do
-	sleep 2
+    RETRIES=$((RETRIES - 1))
+    if [ "$RETRIES" -le 0 ]; then
+		echo "Error: MariaDB didn't respond within the expected time (90s) during the initialization" >&2
+        exit 1
+    fi
+    sleep 2
 done
 
-if [ ! -f /var/www/html/.initialized ]; then
+if [ ! -f "$MARKER" ]; then
 
 	if [ ! -f /var/www/html/wp-config.php ]; then
 		echo "Copying WordPress into the volume..."
@@ -52,7 +59,7 @@ if [ ! -f /var/www/html/.initialized ]; then
 	fi
 
 	chown -R www-data:www-data /var/www/html
-	touch /var/www/html/.initialized
+	touch "$MARKER"
 fi
 
 exec php-fpm8.2 -F
