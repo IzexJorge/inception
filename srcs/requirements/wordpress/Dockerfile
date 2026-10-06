@@ -4,7 +4,8 @@ FROM debian:bookworm-slim
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
         php-fpm php-cli php-mysqli php-gd php-curl php-xml \
-        php-mbstring php-zip php-intl mariadb-client curl && \
+        php-mbstring php-zip php-intl mariadb-client curl \
+        ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
 RUN curl -o /usr/local/bin/wp -sSL \

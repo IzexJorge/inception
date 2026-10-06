@@ -1,4 +1,3 @@
-
 #!/bin/bash
 set -e
 
@@ -15,12 +14,12 @@ fi
 echo "Waiting for MariaDB to accept connections..."
 RETRIES=45
 until mysqladmin ping -h"mariadb" -u"${MYSQL_USER}" -p"${DB_PASSWORD}" --silent 2>/dev/null; do
-    RETRIES=$((RETRIES - 1))
-    if [ "$RETRIES" -le 0 ]; then
+	RETRIES=$((RETRIES - 1))
+	if [ "$RETRIES" -le 0 ]; then
 		echo "Error: MariaDB didn't respond within the expected time (90s) during the initialization" >&2
-        exit 1
-    fi
-    sleep 2
+		exit 1
+	fi
+	sleep 2
 done
 
 if [ ! -f "$MARKER" ]; then

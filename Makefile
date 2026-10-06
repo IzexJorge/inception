@@ -65,10 +65,10 @@ re: fclean all
 .PHONY: all up down stop start restart ps logs reset-data clean fclean re
 
 $(DATA_DIR)/wordpress:
-	mkdir -p $@
+	sudo mkdir -p $@
 
 $(DATA_DIR)/mariadb:
-	mkdir -p $@
+	sudo mkdir -p $@
 
 $(SECRETS_DIR):
 	mkdir -p $@
