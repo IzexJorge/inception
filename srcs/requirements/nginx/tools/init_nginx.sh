@@ -8,7 +8,7 @@ mkdir -p "$CERT_DIR"
 
 if [ ! -f "$MARKER" ]; then
 	echo "Generating autosigned certificate for ${DOMAIN_NAME}..."
-	openssl req -x509 -nodes -days 365 -newkey rsa:2048 -quiet \
+	openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 		-keyout "$CERT_DIR/${DOMAIN_NAME}.key" \
 		-out "$CERT_DIR/${DOMAIN_NAME}.crt" \
 		-subj "/C=ES/O=42/OU=Inception/CN=${DOMAIN_NAME}"

@@ -15,6 +15,8 @@ RUN curl -o /usr/local/bin/wp -sSL \
 RUN mkdir -p /usr/src/wordpress && \
     wp core download --path=/usr/src/wordpress --allow-root
 
+RUN ln -sf /dev/stderr /var/log/php8.2-fpm.log
+
 COPY conf/www.conf /etc/php/8.2/fpm/pool.d/www.conf
 COPY tools/init_wp.sh /usr/local/bin/init_wp.sh
 RUN chmod +x /usr/local/bin/init_wp.sh
