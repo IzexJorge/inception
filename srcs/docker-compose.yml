@@ -6,7 +6,7 @@ services:
   nginx:
     build:
       context: ./requirements/nginx
-    image: nginx
+    image: nginx:inception
     container_name: nginx
     restart: unless-stopped
     env_file:
@@ -23,7 +23,7 @@ services:
   wordpress:
     build:
       context: ./requirements/wordpress
-    image: wordpress
+    image: wordpress:inception
     container_name: wordpress
     restart: unless-stopped
     env_file:
@@ -42,7 +42,9 @@ services:
   mariadb:
     build:
       context: ./requirements/mariadb
-    image: mariadb
+      args:
+        MYSQL_PORT: ${MYSQL_PORT}
+    image: mariadb:inception
     container_name: mariadb
     restart: unless-stopped
     env_file:

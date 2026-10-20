@@ -5,7 +5,7 @@ endif
 
 include srcs/.env
 
-REQUIRED_VARS = LOGIN DOMAIN_NAME MYSQL_DATABASE MYSQL_USER \
+REQUIRED_VARS = LOGIN DOMAIN_NAME MYSQL_DATABASE MYSQL_USER MYSQL_PORT \
 				WP_TITLE WP_ADMIN_USER WP_ADMIN_EMAIL WP_USER WP_USER_EMAIL
 
 $(foreach var,$(REQUIRED_VARS),$(if $($(var)),,$(error $(var) is not defined in srcs/.env)))

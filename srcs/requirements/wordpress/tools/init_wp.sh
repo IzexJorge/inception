@@ -13,7 +13,7 @@ fi
 
 echo "Waiting for MariaDB to accept connections..."
 RETRIES=45
-until mysqladmin ping -h"mariadb" -u"${MYSQL_USER}" -p"${DB_PASSWORD}" --silent 2>/dev/null; do
+until mysqladmin ping -h"mariadb" -P"${MYSQL_PORT}" -u"${MYSQL_USER}" -p"${DB_PASSWORD}" --silent 2>/dev/null; do
 	RETRIES=$((RETRIES - 1))
 	if [ "$RETRIES" -le 0 ]; then
 		echo "Error: MariaDB didn't respond within the expected time (90s) during the initialization" >&2
@@ -32,7 +32,7 @@ if [ ! -f "$MARKER" ]; then
 			--dbname="${MYSQL_DATABASE}" \
 			--dbuser="${MYSQL_USER}" \
 			--dbpass="${DB_PASSWORD}" \
-			--dbhost="mariadb" \
+			--dbhost="mariadb:${MYSQL_PORT}" \
 			--allow-root
 	fi
 

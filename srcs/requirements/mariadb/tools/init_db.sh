@@ -44,4 +44,4 @@ if [ ! -f "$MARKER" ]; then
 	touch "$MARKER"
 fi
 
-exec mariadbd --user=mysql --bind-address=0.0.0.0
+exec mariadbd --user=mysql --bind-address=0.0.0.0 --port="${MYSQL_PORT}"
