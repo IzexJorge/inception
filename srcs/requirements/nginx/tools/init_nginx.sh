@@ -19,7 +19,7 @@ fi
 echo "Waiting for WordPress (php-fpm) to be ready..."
 RETRIES=75
 until SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET CONTENT_LENGTH=0 \
-		cgi-fcgi -bind -connect wordpress:9000 2>/dev/null | grep -q "pong"; do
+		cgi-fcgi -bind -connect wordpress:${WP_PORT} 2>/dev/null | grep -q "pong"; do
 	RETRIES=$((RETRIES - 1))
 	if [ "$RETRIES" -le 0 ]; then
 		echo "Error: WordPress didn't respond within the expected time (150s) during the initialization" >&2
@@ -28,7 +28,7 @@ until SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET CONTENT_LENGTH=
 	sleep 2
 done
 
-envsubst '${DOMAIN_NAME}' < /etc/nginx/templates/wordpress.conf.template \
+envsubst '${DOMAIN_NAME} ${WP_PORT}' < /etc/nginx/templates/wordpress.conf.template \
 	> /etc/nginx/sites-available/wordpress.conf
 
 ln -sf /etc/nginx/sites-available/wordpress.conf /etc/nginx/sites-enabled/wordpress.conf

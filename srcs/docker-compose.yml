@@ -23,6 +23,8 @@ services:
   wordpress:
     build:
       context: ./requirements/wordpress
+      args:
+        WP_PORT: ${WP_PORT}
     image: wordpress:inception
     container_name: wordpress
     restart: unless-stopped

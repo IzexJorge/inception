@@ -1,5 +1,6 @@
 
 FROM debian:bookworm-slim
+ARG WP_PORT
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -23,6 +24,6 @@ RUN chmod +x /usr/local/bin/init_wp.sh
 
 WORKDIR /var/www/html
 
-EXPOSE 9000
+EXPOSE ${WP_PORT}
 
 ENTRYPOINT ["init_wp.sh"]
