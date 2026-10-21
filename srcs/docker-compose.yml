@@ -6,6 +6,8 @@ services:
   nginx:
     build:
       context: ./requirements/nginx
+      args:
+        NGINX_PORT: ${NGINX_PORT}
     image: nginx:inception
     container_name: nginx
     restart: unless-stopped
@@ -16,7 +18,7 @@ services:
     volumes:
       - wordpress_data:/var/www/html
     ports:
-      - "443:443"
+      - "443:${NGINX_PORT}"
     depends_on:
       - wordpress
 

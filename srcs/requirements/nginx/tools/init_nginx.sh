@@ -28,7 +28,7 @@ until SCRIPT_NAME=/ping SCRIPT_FILENAME=/ping REQUEST_METHOD=GET CONTENT_LENGTH=
 	sleep 2
 done
 
-envsubst '${DOMAIN_NAME} ${WP_PORT}' < /etc/nginx/templates/wordpress.conf.template \
+envsubst '${NGINX_PORT} ${DOMAIN_NAME} ${WP_PORT}' < /etc/nginx/templates/wordpress.conf.template \
 	> /etc/nginx/sites-available/wordpress.conf
 
 ln -sf /etc/nginx/sites-available/wordpress.conf /etc/nginx/sites-enabled/wordpress.conf
