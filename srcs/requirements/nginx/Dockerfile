@@ -1,6 +1,5 @@
 
 FROM debian:bookworm-slim
-ARG NGINX_PORT
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -14,6 +13,7 @@ COPY conf/wordpress.conf.template /etc/nginx/templates/wordpress.conf.template
 COPY tools/init_nginx.sh /usr/local/bin/init_nginx.sh
 RUN chmod +x /usr/local/bin/init_nginx.sh
 
+ARG NGINX_PORT
 EXPOSE ${NGINX_PORT}
 
 ENTRYPOINT ["init_nginx.sh"]

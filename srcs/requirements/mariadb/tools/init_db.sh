@@ -5,9 +5,6 @@ DB_PASSWORD=$(cat /run/secrets/db_password)
 DB_ROOT_PASSWORD=$(cat /run/secrets/db_root_password)
 MARKER="/var/lib/mysql/.initialized"
 
-mkdir -p /run/mysqld
-chown mysql:mysql /run/mysqld
-
 chown -R mysql:mysql /var/lib/mysql
 
 if [ ! -f "$MARKER" ]; then
