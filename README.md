@@ -4,7 +4,7 @@
 
 ## Description
 
-Inception is a system administration project, which goal is to build with Docker Compose a web infrastructure, composed of three Docker containers that communicate with eachother through a Docker network.  
+Inception is a system administration project, which goal is to build with Docker Compose a web infrastructure, composed of three Docker containers that communicate with each other through a Docker network.  
 A container is a process that uses the Linux kernel functions to isolate its own processes, network and file system. Each container is created from a Docker image.  
 An image is a template that presents everything needed for the container to initialize, including the script that is executed every time the container starts or restarts.  
 An image is built from a `Dockerfile`, a text file with commands that define layers that only need to be rebuilt if a previous layer has been rebuilt because of a modification.  
@@ -57,25 +57,31 @@ The database is stored in a volume, which is not accessible from the other two c
 		├── mariadb/
 			├── Dockerfile
 			├── .dockerignore
-			├── conf/my.cnf						# MariaDB's configuration
-			└── tools/init_db.sh				# Entry-point script
+			├── conf/
+				└── my.cnf						# MariaDB's configuration
+			└── tools/
+				└── init_db.sh					# Entry-point script
 		├── nginx/
 			├── Dockerfile
 			├── .dockerignore
-			├── conf/wordpress.conf.template	# NGINX server block template
-			└── tools/init_nginx.sh				# Entry-point script
+			├── conf/
+				└── wordpress.conf.template		# NGINX server block template
+			└── tools/
+				└── init_nginx.sh				# Entry-point script
 		└── wordpress/
 			├── Dockerfile
 			├── .dockerignore
-			├── conf/www.conf					# php-fpm pool configuration
-			└── tools/init_wp.sh				# Entry point script
+			├── conf/
+				└── www.conf					# php-fpm pool configuration
+			└── tools/
+				└── init_wp.sh					# Entry point script
 ```
 
 ### Main design choices
 
 - **One service per container.** Each container runs a single daemon and nothing else: `nginx`, `php-fpm` and `mariadbd`.
 - **Daemons run in the foreground as PID 1.** Each entry-point script ends with `exec`, replacing the shell with the daemon. Docker signals therefore reach the daemon directly and `docker stop` shuts it down cleanly. There are no `tail -f` tricks, `sleep infinity`, infinite loops or wrapper supervisors such as `mysqld_safe`, so restarts are handled by Docker.
-- **Initialisation happens at start, not at build.** Anything that needs a volume, a secret or another container is done by the entry-point scripts: database bootstrap, WordPress installation with WP-CLI and certificate generation. Scripts are idempotent (marker files in the volumes), and every wait for a dependency has a bounded number of retries and fails with an explicit error.
+- **Initialisation happens at start, not at build.** Anything that needs a volume, a secret or another container is done by the entry-point scripts: database bootstrap, WordPress installation with WP-CLI and certificate generation. Scripts are idempotent, and every wait for a dependency has a bounded number of retries and fails with an explicit error.
 - **TLS.** `nginx` generates a self-signed certificate when it starts, with the domain name as Common Name (CN), so the private key is never stored in an image layer. Only TLSv1.2 and TLSv1.3 are enabled. Browsers show a warning because the certificate is self-signed, which is expected.
 - **Single entry point.** Only `nginx` publishes a port, and the host port is fixed at 443. The port each service listens on inside its container is configurable in `srcs/.env`. NGINX issues relative redirects so URLs stay correct whatever its internal port is.
 - **Fail-fast Makefile.** It aborts with a clear message if `srcs/.env` is missing, a required variable is empty, or the WordPress administrator name contains `admin`.
@@ -90,7 +96,7 @@ A container shares the kernel of the host and is isolated with namespaces (PID, 
 
 #### Secrets vs Environment Variables
 
-A secret is sensitive information that musn't ever be shared by the repository, nor be present in an image or in the environment. They are created by each user as text files in `secrets/` and used by Docker Compose through Docker secrets.  
+A secret is sensitive information that mustn't ever be shared by the repository, nor be present in an image or in the environment. They are created by each user as text files in `secrets/` and used by Docker Compose through Docker secrets.  
 Environment variables are non-sensitive user data, or just data that the user might want to change. They are defined by the user in `srcs/.env`, which the user creates by copying and renaming `srcs/.env.example`, which acts as a template, since it doesn't make sense to include the `srcs/.env` in the repository, as some of the values aren't adequate for any user. They are used by Docker Compose through the env_file parameter.
 
 #### Docker Network vs Host Network
@@ -101,7 +107,7 @@ With the host network a container shares the network stack of the machine, so ev
 #### Docker Volumes vs Bind Mounts
 
 A bind mount maps a specific host path to a path inside a container, allowing direct access, but it does not create a Docker volume resource.  
-A Docker Volume is a named resource managed by Docker that has a lifecycle independent of the containers using them. By default, Docker stores its data. However, the named Docker volumes in this project use the `driver: local` configuration with `type: none`, `o: bind` and `device: /home/<login>/data/...` options so that they are mapped to a host path, having the best aspects of both worlds.
+A Docker Volume is a named resource managed by Docker that has a lifecycle independent of the containers using them. By default, Docker stores its data in `/var/lib/docker/volumes/`. However, the named Docker volumes in this project use the `driver: local` configuration with `type: none`, `o: bind` and `device: /home/<login>/data/...` options so that they are mapped to a host path, having the best aspects of both worlds.
 
 ## Instructions
 
@@ -128,7 +134,7 @@ The instructions are split by audience:
 - Docker Compose documentation: <https://docs.docker.com/compose/>
 - Docker networking: <https://docs.docker.com/engine/network/>
 - Docker volumes: <https://docs.docker.com/engine/storage/volumes/>
-- Docker secrets: <https://docs.docker.com/engine/swarm/secrets/>
+- Docker secrets: <https://docs.docker.com/compose/how-tos/use-secrets/>
 - NGINX documentation, including the SSL module: <https://nginx.org/en/docs/>
 - PHP-FPM manual: <https://www.php.net/manual/en/install.fpm.php>
 - WP-CLI commands: <https://developer.wordpress.org/cli/commands/>
@@ -137,4 +143,6 @@ The instructions are split by audience:
 
 ### Use of AI
 
-An AI assistant (Claude) was used throughout the project, as a tutor and as a reviewer. The example pieces of code it produced were reviewed, understood, adapted, run and debugged.
+An AI assistant (Claude) was used throughout the project, as a tutor and as a reviewer.  
+All pieces of code it generated were just basic implementations of small tasks and were studied, understood and adapted.
+It was asked to search for potential design defects at different stages of the project, as a second opinion.
