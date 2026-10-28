@@ -7,11 +7,11 @@ For the day-to-day use of the website, see `USER_DOC.md`.
 
 Commands are run from the root of the repository unless stated otherwise. `<login>` is the 42 login set in `LOGIN` in `srcs/.env`.
 
-## Set up the environment from scratch
+## 1. Set up the environment from scratch
 
-This project must run inside a Linux virtual machine.
+This project must run in a Linux machine.
 
-### Prerequisites
+### 1.1 Prerequisites
 
 The following programs and permissions are required for this project.
 
@@ -34,7 +34,7 @@ sudo usermod -aG docker $USER    # then log out and log in again
 Members of the `docker` group have, in practice, root privileges on the machine.  
 To install Docker Engine and the Compose plugin, follow the official instructions for your distribution: <https://docs.docker.com/engine/install/>.
 
-### Clone the repository
+### 1.2 Clone the repository
 
 If you are reading this in the repository page, first you must clone this repository into your machine. Its URL is typically in the "Code" button in its main page.
 
@@ -42,7 +42,7 @@ If you are reading this in the repository page, first you must clone this reposi
 git clone <repository-url> inception && cd inception
 ```
 
-### Register the domain locally
+### 1.3 Register the domain locally
 
 `<login>.42.fr` is not a registered domain, so it has to be resolved locally. Register it in the /etc/hosts file as the localhost (127.0.0.1).
 
@@ -50,46 +50,32 @@ git clone <repository-url> inception && cd inception
 echo "127.0.0.1  <login>.42.fr" | sudo tee -a /etc/hosts
 ```
 
-### Configuration files
+### 1.4 Configuration file
 
-### Secrets
-
----------------
-
-### 1.3 Repository files that are not versioned
-
-Two items are required by the stack but are ignored by Git on purpose, because they are specific to each machine or secret:
-
-- `srcs/.env`: local configuration. `srcs/.env.example` is the versioned template and contains no secret.
-- `secrets/`: the password files.
-
-On a fresh clone neither exists, so the next two sections create them.
-
-### 1.4 Configuration file: `srcs/.env`
+First, copy and rename `srcs/.env.example`, which contains the environment variables used for the user configuration, with generic placeholder values.
 
 ```bash
 cp srcs/.env.example srcs/.env
 ```
 
-Edit the copy. `srcs/.env.example` lists every variable with a placeholder value. They are grouped as follows:
+Edit `srcs/.env`, changing only the variable values, with your user data and preferences, respecting the following rules:
+- Don't change the variable names.
+- One variable per line.
+- Don't add spaces nor quotes, since they would become part of the value.
+- The administrator's name must not contain `admin` in any capitalisation.
 
-| Group                    | What it defines                                                                                                  |
+This table categorizes the different environment variables in functional groups:
+
+| Function                 | What it defines                                                                                                  |
 |--------------------------|------------------------------------------------------------------------------------------------------------------|
-| Identity                 | `LOGIN` (your 42 login; it determines the data folder `/home/<login>/data`) and `DOMAIN_NAME` (`<login>.42.fr`)   |
+| Identity                 | `LOGIN` (your 42 login). It determines the data folder `/home/<login>/data`.                                     |
 | Database                 | Name of the WordPress database and of the user that WordPress uses to connect to it                              |
 | WordPress                | Site title, the administrator (name and email) and the second user (name and email)                              |
 | Internal ports           | The port each service listens on inside its container (for example `NGINX_PORT`)                                 |
 
-Rules:
+### 1.5 Secrets
 
-- Write one `NAME=value` per line, **without quotes**: the value is read both by Docker Compose and by the Makefile, and the quotes would become part of the value.
-- The administrator's name must not contain `admin` in any capitalisation (a rule of the subject). The Makefile refuses to run otherwise.
-- The port published on the host is always 443 and is fixed in `srcs/docker-compose.yml`; only the port that NGINX uses inside its container is configurable.
-- The Makefile reads this file on every invocation, including `make down`, and stops with an error if the file is missing or a required variable is empty.
-
-### 1.6 Secrets
-
-Passwords are Docker secrets, stored as files in `secrets/`:
+The `secrets/` folder is not included in the repository, since it must store sensitive information, which is described in this table.  
 
 | File                              | Used by                  | Content                                     | Created by `make`                            |
 |-----------------------------------|--------------------------|---------------------------------------------|----------------------------------------------|
@@ -98,112 +84,64 @@ Passwords are Docker secrets, stored as files in `secrets/`:
 | `secrets/wp_admin_password.txt`   | `wordpress`              | Password of the WordPress administrator     | Typed by you (hidden prompt)                 |
 | `secrets/wp_user_password.txt`    | `wordpress`              | Password of the second WordPress user       | Typed by you (hidden prompt)                 |
 
-The two database passwords are only used by the containers, so they are random. The two WordPress passwords are used by people to log in, so they are chosen by you. An empty password is rejected.
+You don't need to create this folder or files, since later when you build the project with `make` it will create them if they are missing, allowing you to input the content.  
 
-`make` creates only the files that are missing and never overwrites existing ones. The files are created with mode 644, so any local user of the machine can read them. To create one by hand, write the password **without a trailing newline**:
-
-```bash
-mkdir -p secrets
-printf '%s' 'the-password' > secrets/wp_admin_password.txt
-```
-
-At runtime Docker mounts each secret read-only at `/run/secrets/<name>` inside the containers that declare it, and the entry-point scripts read it from there. Never commit these files.
-
-Passwords are applied **only the first time** the data is initialised (see section 4.4). Editing a secret afterwards does not change the password stored in the database. After changing one, reset the data with `make reset-data`.
+Passwords are applied only the first time the data is initialized. Editing a secret afterwards does not change the password stored in the database.
 
 ## 2. Build and launch
 
-### 2.1 With the Makefile
+To build and launch the project you need to execute `make`.  
 
 ```bash
 make
 ```
 
-`make` (or `make up`) does the following, in order:
+It does the following, in order:
 
 1. Checks that `srcs/.env` exists, that the required variables are set and that the administrator's name does not contain `admin`.
-2. Creates the missing secrets in `secrets/` (section 1.6).
-3. Creates `/home/<login>/data/wordpress` and `/home/<login>/data/mariadb` if they do not exist (with `sudo`).
+2. Creates `secrets/` and its missing files if they are missing, allowing you to input the content (see section 1.5).
+3. Creates `/home/<login>/data/wordpress` and `/home/<login>/data/mariadb` if they are missing (with `sudo`).
 4. Runs `docker compose -f srcs/docker-compose.yml up --detach --build`, which builds the three images, creates the network and the volumes, and starts the containers in the background.
-
-Running `make` again is safe: Docker reuses cached image layers, and only recreates the containers whose image or configuration changed.
-
-Available targets:
-
-| Command           | Effect                                                                                                                                       |
-|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------|
-| `make` / `make up` | Builds and starts the whole stack (steps above)                                                                                              |
-| `make stop`       | Stops the containers without removing them                                                                                                   |
-| `make start`      | Starts containers that were stopped                                                                                                          |
-| `make restart`    | Restarts the containers. It does not rebuild images or apply configuration changes (use `make up` for that)                                  |
-| `make down`       | Removes the containers and the network. Images, volumes and data are kept                                                                    |
-| `make ps`         | Shows the state of the containers                                                                                                            |
-| `make logs`       | Follows the logs of all the services (press Ctrl+C to stop following)                                                                        |
-| `make clean`      | Like `down`, and also removes the images built for the project. Volumes and data are kept                                                    |
-| `make reset-data` | Like `down`, and then deletes the contents of the WordPress and MariaDB data folders (with `sudo`). Images and secrets are kept              |
-| `make fclean`     | Like `clean`, and also removes the volumes and deletes the data folders (with `sudo`)                                                        |
-| `make re`         | `make fclean` followed by `make`                                                                                                             |
-
-**`make fclean`, `make reset-data` and `make re` permanently delete the WordPress site and the database.** None of the targets deletes `secrets/` or `srcs/.env`.
-
-### 2.2 Start-up sequence
-
-Compose creates `mariadb`, then `wordpress`, then `nginx`. `depends_on` only orders the creation of the containers, so each entry-point script waits for what it needs, with a limit:
-
-| Container   | Waits for                              | Limit        | If exceeded                                   |
-|-------------|----------------------------------------|--------------|-----------------------------------------------|
-| `mariadb`   | Its own temporary instance (first run) | about 30 s   | Exits with an error                           |
-| `wordpress` | MariaDB to accept connections          | about 90 s   | Exits with an error                           |
-| `nginx`     | php-fpm in the `wordpress` container   | about 150 s  | Exits with an error                           |
-
-A container that exits is restarted by Docker (`restart: unless-stopped`). The first start takes longer than the following ones because of the database bootstrap and the WordPress installation. You can follow it with `make logs`.
-
-### 2.3 With Docker Compose directly
-
-The Makefile is a thin wrapper. The equivalent direct commands are:
-
-```bash
-docker compose -f srcs/docker-compose.yml up --detach --build   # build and start
-docker compose -f srcs/docker-compose.yml down                  # remove containers and network
-docker compose -f srcs/docker-compose.yml config                # validate the file and show it with variables resolved
-docker compose -f srcs/docker-compose.yml build --no-cache      # rebuild the images ignoring the cache
-```
-
-Calling Compose directly skips the Makefile's checks. The secret files and the data folders must already exist, otherwise Compose fails; run `make` at least once to create them.
 
 ## 3. Managing containers and volumes
 
-The services are `nginx`, `wordpress` and `mariadb`, and the containers and images carry the same names. In the commands below `<service>` is one of them.
+`make` also has many other targets that allow you to manage the containers and the volumes.  
+Executing `make up` does the same thing as `make`, since `up` is the default target.
+
+```bash
+make up
+```
+
+This table describes the `make` targets, which allow to manage containers and volumes.  
+The services are `nginx`, `wordpress` and `mariadb`, and the containers and images carry the same names.  
+
+| Command            | Effect                                                                                                                              |
+|--------------------|-------------------------------------------------------------------------------------------------------------------------------------|
+| `make` / `make up` | Builds and starts the whole stack (see section 2)                                                                                   |
+| `make down`        | Removes the containers and the network. Images, volumes and data are kept                                                           |
+| `make stop`        | Stops the containers without removing them                                                                                          |
+| `make start`       | Starts containers that were stopped                                                                                                 |
+| `make restart`     | Restarts the containers, just like doing stop and then start                                                                        |
+| `make ps`          | Shows the state of the containers                                                                                                   |
+| `make volumes`     | Lists the volumes                                                                                                                   |
+| `make logs`        | Follows the logs of all the services (press Ctrl+C to stop following)                                                               |
+| `make clean`       | Like `down`, and also removes the images built for the project. Volumes and data are kept                                           |
+| `make reset-data`  | Like `down`, and then deletes the contents of the WordPress and MariaDB data folders (with `sudo`). Images and secrets are kept     |
+| `make fclean`      | Like `clean`, and also removes the volumes and deletes the data folders (with `sudo`)                                               |
+| `make re`          | `make fclean` followed by `make`                                                                                                    |
+
+**`make fclean`, `make reset-data` and `make re` permanently delete the WordPress site and the database.** None of the targets deletes `secrets/` or `srcs/.env`.
+
+### 3.1 Database
+
+
+
+-------------
 
 ### 3.1 Containers
 
-| Goal                                  | Command                                                                              |
-|---------------------------------------|--------------------------------------------------------------------------------------|
-| State of the containers               | `make ps` or `docker compose -f srcs/docker-compose.yml ps`                          |
-| Logs of one service                   | `docker compose -f srcs/docker-compose.yml logs --follow <service>`                  |
-| Open a shell inside a container       | `docker compose -f srcs/docker-compose.yml exec <service> bash`                      |
-| Restart a single service              | `docker compose -f srcs/docker-compose.yml restart <service>`                        |
-| Rebuild and recreate a single service | `docker compose -f srcs/docker-compose.yml up --detach --build <service>`            |
-| List the images                       | `docker images`                                                                      |
 
-NGINX and php-fpm write their logs to the standard output and error, so `logs` shows them together with those of the entry-point scripts.
 
-### 3.2 Network
-
-```bash
-docker network ls                          # the project network is inception_inception
-docker network inspect inception_inception # shows the three containers and their addresses
-```
-
-### 3.3 Volumes
-
-```bash
-docker volume ls                              # inception_wordpress_data and inception_mariadb_data
-docker volume inspect inception_wordpress_data
-docker volume inspect inception_mariadb_data
-```
-
-In the output of `inspect`, the `Options` section shows `"device": "/home/<login>/data/..."`, which is where the data lives on the host (see section 4).
 
 ### 3.4 Database
 

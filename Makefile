@@ -47,6 +47,9 @@ restart:
 ps:
 	docker compose -f $(COMPOSE) ps
 
+volumes:
+	docker compose -f $(COMPOSE) volumes
+
 logs:
 	docker compose -f $(COMPOSE) logs --follow
 
