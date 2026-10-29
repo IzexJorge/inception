@@ -40,10 +40,10 @@ Turning off the host machine while the containers are running only stops them, a
 ## 3. Access the website and the administration panel
 
 1. Open a web browser.
-2. Go to `https://<login>.42.fr/wp-login.php`.
+2. Go to <https://login.42.fr/wp-login.php>. Replace "login" to write your domain correctly.
 3. The first time, the browser shows a security warning. This is expected: the HTTPS certificate is self-signed. Accept the risk to continue.
 4. Log in with your user and password. The next section of this document explains where to locate and manage credentials.
-5. To open the administration panel, go to `https://<login>.42.fr/wp-admin`.
+5. To open the administration panel, go to <https://login.42.fr/wp-admin>.
 
 ## 4. Locate and manage credentials
 
@@ -67,11 +67,11 @@ If you can access the website as explained in section 3 and the page loads corre
 You can easily check it from the shell with this command.
 
 ```bash
-curl -ksf https://<login>.42.fr | grep -qE "wp-content|wp-includes" && echo "OK" || echo "FAILED"
+curl -ksf https://login.42.fr | grep -qE "wp-content|wp-includes" && echo "OK" || echo "FAILED"
 ```
 
 You can also see just the SSL/TLS certificate line, to confirm the version.
 
 ```bash
-curl -vkI https://<login>.42.fr 2>&1 | grep -E "SSL connection"
+curl -vkI https://login.42.fr 2>&1 | grep -E "SSL connection"
 ```
