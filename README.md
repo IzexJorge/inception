@@ -107,7 +107,8 @@ With the host network a container shares the network stack of the machine, so ev
 #### Docker Volumes vs Bind Mounts
 
 A bind mount maps a specific host path to a path inside a container, allowing direct access, but it does not create a Docker volume resource.  
-A Docker Volume is a named resource managed by Docker that has a lifecycle independent of the containers using them. By default, Docker stores its data in `/var/lib/docker/volumes/`. However, the named Docker volumes in this project use the `driver: local` configuration with `type: none`, `o: bind` and `device: /home/<login>/data/...` options so that they are mapped to a host path, having the best aspects of both worlds.
+A Docker volume is a resource managed by Docker that has a lifecycle independent of the containers using them.  
+By default, Docker stores volumes data in `/var/lib/docker/volumes/`. However, the Docker named volumes in this project use the `driver: local` configuration with `type: none`, `o: bind` and `device: /home/<login>/data/...` options, which allows them to be mapped to a host path.
 
 ## Instructions
 
