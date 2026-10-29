@@ -10,7 +10,7 @@ An image is a template that presents everything needed for the container to init
 An image is built from a `Dockerfile`, a text file with commands that define layers that only need to be rebuilt if a previous layer has been rebuilt because of a modification.  
 All Dockerfiles in this project have been written specifically for it, and the only ready-made component they use is the penultimate stable version of Debian, which is the starting point of each of the three containers.  
 Each container runs a service that is required for our web infrastructure to work properly.  
-Our infrastructure uses two volumes, located at `/home/<login>/data/` in the host and mounted in the containers, that store the data that must survive deleting the containers and the images.
+Our infrastructure uses two volumes, whose data is located at `/home/<login>/data/` in the host and mounted in the containers. This data survives after deleting the containers and the images.
 
 ### NGINX
 

@@ -3,13 +3,14 @@
 
 This document explains how to set up, build, launch and maintain the Inception stack.  
 For an overview of the project, see `README.md`.  
-For the day-to-day use of the website, see `USER_DOC.md`.  
+For an explanation about how to use the Inception stack as an end user or administrator, see `USER_DOC.md`.  
 
 Commands are run from the root of the repository unless stated otherwise. `<login>` is the 42 login set in `LOGIN` in `srcs/.env`.
 
 ## 1. Set up the environment from scratch
 
-This project must run in a Linux machine.
+This project must run in a Linux machine.  
+Commands must be run from the root of the repository.
 
 ### 1.1 Prerequisites
 
