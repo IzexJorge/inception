@@ -147,3 +147,13 @@ The instructions are split by audience:
 An AI assistant (Claude) was used throughout the project, as a tutor and as a reviewer.  
 All pieces of code it generated were just basic implementations of small tasks and were studied, understood and adapted.
 It was asked to search for potential design defects at different stages of the project, as a second opinion.
+
+### AI usage
+
+I used an AI assistant (Claude) in all stages of the project, as a tutor and as a reviewer:
+
+- Theorical questions.
+- Technical coding questions.
+- Reviewing to find bugs that I didn't notice.
+
+I reviewed every proposed change, applied the ones I agreed with by hand and tested them myself.
