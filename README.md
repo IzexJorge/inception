@@ -142,12 +142,6 @@ The instructions are split by audience:
 - MariaDB documentation: <https://mariadb.com/kb/en/documentation/>
 - Debian releases: <https://wiki.debian.org/DebianReleases>
 
-### Use of AI
-
-An AI assistant (Claude) was used throughout the project, as a tutor and as a reviewer.  
-All pieces of code it generated were just basic implementations of small tasks and were studied, understood and adapted.
-It was asked to search for potential design defects at different stages of the project, as a second opinion.
-
 ### AI usage
 
 I used an AI assistant (Claude) in all stages of the project, as a tutor and as a reviewer:
