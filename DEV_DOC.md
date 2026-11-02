@@ -185,3 +185,13 @@ WP-CLI is installed in the `wordpress` container. This example executes the WP-C
 ```bash
 docker compose -f srcs/docker-compose.yml exec wordpress wp user list --path=/var/www/html --allow-root
 ```
+
+### 4.3 Check container ports
+
+You can check the port each container uses with these commands.
+
+```bash
+docker exec nginx sh -c 'nginx -T 2>/dev/null | grep -E "^\s*listen|fastcgi_pass"'
+docker exec wordpress sh -c 'php-fpm8.2 -tt 2>&1 | grep -E "\slisten =" | sort -u'
+docker exec mariadb sh -c 'mariadb -uroot -p"$(cat /run/secrets/db_root_password)" -e "SELECT @@port;"'
+```
