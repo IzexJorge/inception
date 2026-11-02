@@ -61,4 +61,6 @@ if [ ! -f "$MARKER" ]; then
 	touch "$MARKER"
 fi
 
+wp config set DB_HOST "mariadb:${MYSQL_PORT}" --path=/var/www/html --allow-root
+
 exec php-fpm8.2 -F
